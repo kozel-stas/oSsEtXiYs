@@ -54,6 +54,10 @@ public class Text {
             return characterNumber;
         }
 
+        public String getSource() {
+            return source;
+        }
+
         public List<String> getTokens() {
             return Collections.unmodifiableList(tokens);
         }

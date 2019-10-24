@@ -52,7 +52,7 @@ public class UnifiedTextParser implements TextParser {
         while (wordBoundaryIndex != BreakIterator.DONE) {
             String word = sentence.substring(prevIndex, wordBoundaryIndex);
             if (isWord(word)) {
-                words.add(word);
+                words.add(word.trim());
             }
             prevIndex = wordBoundaryIndex;
             wordBoundaryIndex = breakIterator.next();
@@ -64,7 +64,7 @@ public class UnifiedTextParser implements TextParser {
         if (word.length() == 1) {
             return Character.isLetter(word.charAt(0));
         }
-        return !"".equals(word.trim()) || !stopWordsRepository.getStopWords().contains(word) || !DIGIT_PATTERN.matcher(word).find();
+        return !"".equals(word.trim()) && !stopWordsRepository.getStopWords().contains(word) && !DIGIT_PATTERN.matcher(word).find();
     }
 
 }

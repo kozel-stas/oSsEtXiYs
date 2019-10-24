@@ -1,9 +1,12 @@
 package com.oSsEtXiYs.rest;
 
+import com.oSsEtXiYs.rest.model.EssayMethod;
 import com.oSsEtXiYs.service.engine.EssayService;
 import com.oSsEtXiYs.service.engine.TextParser;
 import com.oSsEtXiYs.service.model.Essay;
+import com.oSsEtXiYs.service.model.Text;
 import org.springframework.http.MediaType;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
@@ -21,13 +24,26 @@ public class EssayController {
     }
 
     @RequestMapping(
-            method = RequestMethod.GET,
+            method = RequestMethod.POST,
             value = "/classic",
-            consumes = {MediaType.APPLICATION_JSON_VALUE}
+            produces = {MediaType.APPLICATION_JSON_VALUE}
     )
-    public String classicEssay() {
-        Essay essay = classicEssayService.pressText(textParser.parse(""));
-        return "";
+    public com.oSsEtXiYs.rest.model.Essay classicEssay(@RequestBody String sourceText) {
+        return new com.oSsEtXiYs.rest.model.Essay(
+                sourceText,
+                constructResult(classicEssayService.pressText(textParser.parse(sourceText))),
+                EssayMethod.CLASSIC
+        );
+    }
+
+    private static String constructResult(Essay essay) {
+        StringBuilder result = new StringBuilder();
+        for (Text.Paragraph paragraph : essay.getParagraphs()) {
+            for (Text.Sentence sentence : paragraph.getSentences()) {
+                result.append(sentence.getSource()).append(" ");
+            }
+        }
+        return result.toString();
     }
 
 }
