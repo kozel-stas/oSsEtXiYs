@@ -1,6 +1,6 @@
 package com.oSsEtXiYs.service.engine;
 
-import com.oSsEtXiYs.service.model.Essay;
+import com.oSsEtXiYs.service.model.ClassicEssay;
 import com.oSsEtXiYs.service.model.Text;
 import org.springframework.stereotype.Service;
 
@@ -22,10 +22,10 @@ public class ClassicEssayService implements EssayService {
     }
 
     @Override
-    public Essay pressText(Text text) {
+    public ClassicEssay pressText(Text text) {
         Map<Text.Sentence, Double> essayCandidate = new HashMap<>();
         Map<String, Double> externalWeight = externalEvaluativeService.evaluateText(text);
-        Map<String, Integer> textNumber = countTokens(text);
+        Map<String, Integer> textNumber = text.countTokens();
         int maxCount = Collections.max(textNumber.values());
         int numberOfSymbolsBeforeDocument = 0;
         int numberOfSymbolsBeforeParagraph = 0;
@@ -45,32 +45,14 @@ public class ClassicEssayService implements EssayService {
 
     private double sentenceScore(Text.Sentence sentence, Map<String, Integer> documentTextNumber, int max, Map<String, Double> externalWeight) {
         double res = 1;
-        Map<String, Integer> textNumber = new HashMap<>();
-        countTokens(textNumber, sentence);
+        Map<String, Integer> textNumber = sentence.countTokens();
         for (String token : sentence.getTokens()) {
             res *= textNumber.get(token) * (0.5 * (1 + (double) documentTextNumber.get(token) / max)) * externalWeight.get(token);
         }
         return res;
     }
 
-    private static Map<String, Integer> countTokens(Text text) {
-        Map<String, Integer> textNumber = new HashMap<>();
-        for (Text.Paragraph paragraph : text.getParagraphs()) {
-            for (Text.Sentence sentence : paragraph.getSentences()) {
-                countTokens(textNumber, sentence);
-            }
-        }
-        return textNumber;
-    }
-
-    private static void countTokens(Map<String, Integer> textNumber, Text.Sentence sentence) {
-        for (String word : sentence.getTokens()) {
-            textNumber.computeIfPresent(word, (k, v) -> v + 1);
-            textNumber.putIfAbsent(word, 1);
-        }
-    }
-
-    private static Essay constructEssayFromCandidate(Text text, Map<Text.Sentence, Double> sentenceScore) {
+    private static ClassicEssay constructEssayFromCandidate(Text text, Map<Text.Sentence, Double> sentenceScore) {
         List<Text.Sentence> orderedSentences = new ArrayList<>();
         List<Double> result = new ArrayList<>(sentenceScore.values());
         Collections.sort(result);
@@ -83,7 +65,7 @@ public class ClassicEssayService implements EssayService {
                 }
             }
         }
-        return new Essay(Collections.singletonList(new Text.Paragraph(orderedSentences)));
+        return new ClassicEssay(Collections.singletonList(new Text.Paragraph(orderedSentences)));
     }
 
 }

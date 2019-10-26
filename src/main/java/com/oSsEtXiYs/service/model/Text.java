@@ -1,7 +1,9 @@
 package com.oSsEtXiYs.service.model;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class Text {
 
@@ -11,6 +13,16 @@ public class Text {
     public Text(List<Paragraph> paragraphs) {
         this.paragraphs = paragraphs;
         this.characterNumber = paragraphs.stream().mapToInt(Paragraph::getCharacterNumber).sum();
+    }
+
+    public Map<String, Integer> countTokens() {
+        Map<String, Integer> textNumber = new HashMap<>();
+        for (Text.Paragraph paragraph : this.getParagraphs()) {
+            for (Text.Sentence sentence : paragraph.getSentences()) {
+                sentence.countTokens(textNumber, sentence);
+            }
+        }
+        return textNumber;
     }
 
     public int getCharacterNumber() {
@@ -60,6 +72,20 @@ public class Text {
 
         public List<String> getTokens() {
             return Collections.unmodifiableList(tokens);
+        }
+
+
+        private void countTokens(Map<String, Integer> textNumber, Text.Sentence sentence) {
+            for (String word : sentence.getTokens()) {
+                textNumber.computeIfPresent(word, (k, v) -> v + 1);
+                textNumber.putIfAbsent(word, 1);
+            }
+        }
+
+        public Map<String, Integer> countTokens() {
+            Map<String, Integer> textNumber = new HashMap<>();
+            countTokens(textNumber, this);
+            return textNumber;
         }
 
     }

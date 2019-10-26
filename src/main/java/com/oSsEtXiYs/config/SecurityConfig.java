@@ -9,6 +9,7 @@ import org.springframework.security.config.annotation.authentication.builders.Au
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 
@@ -28,15 +29,13 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-        auth.inMemoryAuthentication().withUser(user).password(password).roles("user");
+        auth.inMemoryAuthentication().passwordEncoder(new BCryptPasswordEncoder()).withUser(user).password(password).roles("user");
     }
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http
                 .authorizeRequests().anyRequest().authenticated()
-                .and()
-                .cors().configurationSource(corsConfigurationSource())
                 .and()
                 .csrf().disable()
                 .httpBasic();
@@ -47,16 +46,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     public void configure(WebSecurity web) throws Exception {
         super.configure(web);
         web.ignoring().antMatchers(HttpMethod.OPTIONS, "/**");
-    }
-
-    @Bean
-    public CorsConfigurationSource corsConfigurationSource() {
-        return httpServletRequest -> {
-            CorsConfiguration corsConfiguration = new CorsConfiguration();
-            corsConfiguration.applyPermitDefaultValues();
-            corsConfiguration.setAllowedMethods(Arrays.asList(HttpMethod.GET.name(), HttpMethod.POST.name(), HttpMethod.OPTIONS.name()));
-            return corsConfiguration;
-        };
     }
 
 }

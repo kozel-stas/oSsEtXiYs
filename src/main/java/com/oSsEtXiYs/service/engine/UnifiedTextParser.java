@@ -34,7 +34,10 @@ public class UnifiedTextParser implements TextParser {
             int wordBoundaryIndex = breakIterator.first();
             int prevIndex = 0;
             while (wordBoundaryIndex != BreakIterator.DONE) {
-                sentences.add(parseSentence(paragraph.substring(prevIndex, wordBoundaryIndex)));
+                String sentence = paragraph.substring(prevIndex, wordBoundaryIndex);
+                if (isSentence(sentence)) {
+                    sentences.add(parseSentence(sentence));
+                }
                 prevIndex = wordBoundaryIndex;
                 wordBoundaryIndex = breakIterator.next();
             }
@@ -64,7 +67,11 @@ public class UnifiedTextParser implements TextParser {
         if (word.length() == 1) {
             return Character.isLetter(word.charAt(0));
         }
-        return !"".equals(word.trim()) && !stopWordsRepository.getStopWords().contains(word) && !DIGIT_PATTERN.matcher(word).find();
+        return !"".equals(word.trim()) && !stopWordsRepository.getStopWords().contains(word.toLowerCase()) && !DIGIT_PATTERN.matcher(word).find();
+    }
+
+    private boolean isSentence(String sentence) {
+        return !"".equals(sentence);
     }
 
 }
