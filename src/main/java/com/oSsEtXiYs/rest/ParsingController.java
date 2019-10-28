@@ -47,7 +47,7 @@ public class ParsingController {
     }
 
     private String parseInputStream(InputStream inputStream) throws IOException, SAXException, TikaException {
-        ContentHandler contentHandler = new BodyContentHandler();
+        ContentHandler contentHandler = new BodyContentHandler(-1);
         parser.parse(inputStream, contentHandler, new Metadata(), new ParseContext());
         return contentHandler.toString();
     }
